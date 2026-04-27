@@ -19,92 +19,132 @@
 <details>
   <summary>Table of Contents</summary>
   <ol>
-    <li><a href="##Installation">Installation</a></li>
+    <li><a href="#recently-added">Recently Added</a></li>
+    <li><a href="#installation">Installation</a></li>
       <ul>
-        <li><a href="###Getting-the-code">Getting the code</a></li>
-        <li><a href="###Creating-the-enviroment-with-required-dependencies">Creating the enviroment with required dependencies</a></li>
-        <li><a href="###Additional-Dependencies">Additional Dependencies</a></li>
+        <li><a href="#getting-the-code">Getting the code</a></li>
+        <li><a href="#creating-the-environment-with-required-dependencies">Creating the environment with required dependencies</a></li>
+        <li><a href="#additional-dependencies">Additional Dependencies</a></li>
       </ul>
     </li>
-    <li><a href="##Usage">Usage</a></li>
+    <li><a href="#usage">Usage</a></li>
       <ul>
-        <li><a href="###Defining-variables">Defining variables</a></li>
-        <li><a href="Initializing-functions-and-activating-enrviroment">Initializing functions and activating enrviroment</a></li>
-        <li><a href="###Running-the-Code">Running the Code</a></li>
-       <li><a href="###Statistical-test-for-preference-and-genotype-comparisons">Statistical test for preference and genotype comparisons</a></li>
-        <li><a href="###Generating-Stacked-barplots-for-hotspots">Generating Stacked barplots for hotspots</a></li>
+        <li><a href="#defining-variables">Defining variables</a></li>
+        <li><a href="#initializing-functions-and-activating-environment">Initializing functions and activating environment</a></li>
+        <li><a href="#running-masterrunsh">Running Masterrun.sh</a></li>
+        <li><a href="#output-structure">Output structure</a></li>
+        <li><a href="#statistical-test-for-preference-and-genotype-comparisons">Statistical test for preference and genotype comparisons</a></li>
+        <li><a href="#generating-stacked-barplots-for-hotspots">Generating Stacked barplots for hotspots</a></li>
       </ul>
-    <li><a href="##Contributing">Contributing</a></li>
-    <li><a href="##License">License</a></li>
-    <li><a href="##Contact">Contact</a></li>
-    <li><a href="##Citations">Citations</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#citations">Citations</a></li>
   </ol>
 </details>
+
+<!-- RECENTLY ADDED -->
+## Recently Added
+
+**Unified Masterrun.sh with parallel strand workflows**
+`scripts/Masterrun.sh` now runs the both-strands, same-strand, and opposite-strand workflows simultaneously as background jobs, writing results into separate subdirectories (`both/`, `same/`, `opp/`) inside the configured output directory.
+
+**Background frequency caching**
+Background frequency computation (`bg_freq`, `bg_freq_ss`, `bg_freq_os`) is performed once and stored outside the per-run output directory. Subsequent runs with the same reference and range file skip this step automatically, saving significant compute time.
+
+**Per-run output directories**
+All output is written to a named directory set by the `outdir` variable in `Masterrun.sh`. Change `outdir` between runs to keep results from different datasets or parameters cleanly separated.
+
+**Automatic timestamped logging**
+Each workflow subshell logs all stdout and stderr to a `log/` directory inside its output subdirectory. Log files are named by timestamp (`YYYYMMDD_HHMMSS.log`) so reruns accumulate rather than overwrite. Background frequency logs are written to `<outdir>/log/`.
+
+**Reorganized repository layout**
+- `scripts/` — all shell and R scripts (`Masterrun.sh`, `Heatmapwrapper.sh`, `mww.R`, `mww_diff.R`, `comp.R`, `comp_bars.R`)
+- `config/` — configuration files including the example `order` file
+- `RPA/` — RibosePreferenceAnalysis Python scripts (git submodule, path resolved automatically)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- Installation -->
 ## Installation
 ### Getting the code
-The development version from [GitHub](https://github.com/) with:
 ```sh
-git clone https://github.com/xph9876/RibosePreferenceAnalysis.git
-git clone https://github.com/DKundnani/RPA-wrapper.git
+git clone --recurse-submodules https://github.com/twarner620/RPA-wrapper.git
 ```
-### Creating the enviroment with required dependencies
+### Creating the environment with required dependencies
 ```sh
-conda env create --name RPAwrapper_env --file /RPA-wrapper/env.yml
+conda env create --file environment.yml
 ```
 ### Additional Dependencies
 * Input files (bed) containing single nucleotide locations, mainly for rNMP data. (another single nucleotide data can also be experimented on!)
-* Reference genome files (.fa and .fai) of the organism being used(Also used to generate bed files)
-* ranges/bed file fo the genome locations to be analyzed and for which background frequency will be calculated as well.
-* order file, example in repository
+* Reference genome files (.fa and .fai) of the organism being used (also used to generate bed files)
+* Ranges BED file of the genome locations to be analyzed, for which background frequency will be calculated
+* Order file — example provided in `config/order`
 
 <!-- USAGE -->
 ## Usage
 ### Defining variables
+Edit the top section of `scripts/Masterrun.sh`:
 ```bash
-scripts='path/to/RibosePreferenceAnalysis/' #location of RPA repository
-ref='path/to/reference/sacCer2/sacCer2.fa' #Reference Fast file
-range='path/to/ranges/sacCer2/nucl.bed' #Example ranges of nuclear genome of sacCer2
-#range='path/to/chrM.bed' 
-bed='path/to/bed/' #Folder of bed files
-order='path/to/order' #sample file share in the RPA-wrapper repository
+ref='path/to/reference/sacCer2/sacCer2.fa'  # Reference FASTA file
+range='path/to/ranges/sacCer2/nucl.bed'      # Ranges BED file (nuclear genome)
+#range='path/to/chrM.bed'
+bed='path/to/bed/'                           # Folder of bed files
+order='config/order'                         # Order file (example in config/)
+outdir='run1'                                # Output directory; change per run to keep results separate
 ```
-### Initializing functions and activating enrviroment
+The RPA submodule path and all internal paths are resolved automatically — no `scripts` variable needed.
+
+### Initializing functions and activating environment
 ```bash
-conda activate RPAwrapper_env #activating enviroment
-source path/to/RPA-wrapper/Heatmapwrapper.sh
-```
-### Running the Code for both strands
-```bash
-mkdir heatmaps; cd heatmaps #make the output directory and run the code from it
-#Generating Background frequency of the genome
-bg_freq $scripts $ref $range #one time for each range
-sample_freq $scripts $ref $range $bed #Generating frequency of libraries/samples
-norm_freq $scripts $ref $range $bed #Normalizing sample frequency to genome frequency
-resort_plot $scripts $ref $range $bed $order #resort the matrices as per order file and hence the heatmaps
-rm sample_freq/$(basename $range .bed)/*bed #Cleanup
+conda activate RPAwrapper_env
+source path/to/RPA-wrapper/scripts/Heatmapwrapper.sh
 ```
 
-### Running the Code for single strand - gives out same and opposite for the range with 6th column having strand information
+### Running Masterrun.sh
+Edit the variables at the top of `scripts/Masterrun.sh`, then run from the repo root:
 ```bash
-mkdir heatmaps; cd heatmaps #make the output directory and run the code from it
-#Generating Background frequency of the genome
-bg_freq_ss $scripts $ref $range ; bg_freq_os $scripts $ref $range
-sample_freq_ss $scripts $ref $range $bed ; sample_freq_os $scripts $ref $range $bed
-norm_freq_ss $scripts $ref $range $bed ; norm_freq_os $scripts $ref $range $bed
-resort_plot_ss $scripts $ref $range $bed $order ; resort_plot_os $scripts $ref $range $bed $order
-rm sample_freq/$(basename $range .bed)/*bed #Cleanup
+source path/to/RPA-wrapper/scripts/Masterrun.sh
+```
+This single command runs the full pipeline for all three strand modes in parallel:
+- **bg_freq** (both, same, opposite strand) is computed once and cached in `bg_freq/` at the repo root. On subsequent runs with the same `ref` and `range`, this step is skipped.
+- **Both-strand**, **same-strand**, and **opposite-strand** workflows then run simultaneously, each writing into its own subdirectory of `outdir`.
+
+### Output structure
+```
+bg_freq/                        # Shared background frequency cache (ref+range specific)
+
+<outdir>/
+  log/                          # Background frequency logs (timestamped)
+    bg_freq_YYYYMMDD_HHMMSS.log
+    bg_freq_ss_YYYYMMDD_HHMMSS.log
+    bg_freq_os_YYYYMMDD_HHMMSS.log
+  both/                         # Both-strands results
+    log/YYYYMMDD_HHMMSS.log
+    sample_freq/
+    norm_freq/
+    plots/
+  same/                         # Same-strand results
+    log/YYYYMMDD_HHMMSS.log
+    sample_freq/
+    norm_freq/
+    plots/
+  opp/                          # Opposite-strand results
+    log/YYYYMMDD_HHMMSS.log
+    sample_freq/
+    norm_freq/
+    plots/
 ```
 
 ### Statistical test for preference and genotype comparisons
 ```bash
-mww $scripts $ref $range $bed $order
+# Source Heatmapwrapper.sh and set variables as above, then from the relevant outdir subdir:
+mww "$scripts" "$ref" "$range" "$bed" "$order"
 ```
 
 ### Generating Stacked barplots for hotspots
 ```bash
-Rscript path/to/RPA-wrapper/comp.R -m sorted_chrM_mono_0 #hotspot composition files usually contain on entry for every genotype.
+Rscript path/to/RPA-wrapper/scripts/comp.R -m sorted_chrM_mono_0 #hotspot composition files usually contain one entry for every genotype.
 ```
 
 
