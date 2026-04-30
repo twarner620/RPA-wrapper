@@ -1,3 +1,3 @@
 [submodule "RPA"]
 	path = RPA
-	url = git@github.com:xph9876/RibosePreferenceAnalysis.git
+	url = https://github.com/twarner620/RibosePreferenceAnalysis
