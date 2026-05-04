@@ -1,0 +1,30 @@
+beds
+
+# Personal cluster submission script and run configuration
+submit.sbatch
+scripts/Masterrun.sh
+
+# Generated background frequency cache
+bg_freq/
+
+# Per-run output directories (bg_freq symlink, sample/norm/plots, logs)
+*/both/
+*/same/
+*/opp/
+*/log/
+*/sample_freq/
+*/norm_freq/
+*/plots/
+
+# SLURM job logs
+slurm_logs/
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+
+# R artifacts
+.Rhistory
+.RData
+*.Rout

@@ -159,65 +159,18 @@ sample_freq_os () {
 }
 
 
-norm_freq () {
-        #$1=Location of Scripts/git repo
-        #$2=Ref fasta
-        #$3=bed12 file of ranges
-        #$4=location of bed files
-        #Usage1: sample_freq ~/p-fstorici3-0/rich_project_bio-storici/bin/RibosePreferenceAnalysis/ ~/p-fstorici3-0/rich_project_bio-storici/reference/hg38/filtered_hg38.fa ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/anno/subtypes/hg38_cpg_islands.bed ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/bed/
+_norm_freq() {
+        # $1=scripts, $2=base, $3=strand (both/same/opp)
+        local scripts=$1 base=$2 strand=$3
         mkdir -p norm_freq
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_sample.mono ./bg_freq/$(basename ${3} .bed).mono.freq -o ./norm_freq/$(basename ${3} .bed)_mono_0 --name $(basename ${3} .bed)
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_sample.dinuc_d1_nr ./bg_freq/$(basename ${3} .bed).di.freq --group_len 4 -o ./norm_freq/$(basename ${3} .bed)_dinuc_nr_4 --name $(basename ${3} .bed)
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_sample.dinuc_d1_rn ./bg_freq/$(basename ${3} .bed).di.freq --group_len 4 -o ./norm_freq/$(basename ${3} .bed)_dinuc_rn_4 --name $(basename ${3} .bed)
-
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_sample.dinuc_d1_nr ./bg_freq/$(basename ${3} .bed).di.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_dinuc_nr_16 --name $(basename ${3} .bed)
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_sample.dinuc_d1_rn ./bg_freq/$(basename ${3} .bed).di.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_dinuc_rn_16 --name $(basename ${3} .bed)
-
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_sample.trinuc_nnr ./bg_freq/$(basename ${3} .bed).tri.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_trinuc_nnr_16 --name $(basename ${3} .bed)
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_sample.trinuc_nrn ./bg_freq/$(basename ${3} .bed).tri.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_trinuc_nrn_16 --name $(basename ${3} .bed)
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_sample.trinuc_rnn ./bg_freq/$(basename ${3} .bed).tri.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_trinuc_rnn_16 --name $(basename ${3} .bed)
-        
+        python3 ${scripts}/normalize.py --base ${base} --mode mono --strand ${strand}
+        python3 ${scripts}/normalize.py --base ${base} --mode di   --strand ${strand}
+        python3 ${scripts}/normalize.py --base ${base} --mode tri  --strand ${strand}
 }
 
-norm_freq_ss () {
-        #$1=Location of Scripts/git repo
-        #$2=Ref fasta
-        #$3=bed12 file of ranges
-        #$4=location of bed files
-        #Usage1: sample_freq ~/p-fstorici3-0/rich_project_bio-storici/bin/RibosePreferenceAnalysis/ ~/p-fstorici3-0/rich_project_bio-storici/reference/hg38/filtered_hg38.fa ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/anno/subtypes/hg38_cpg_islands.bed ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/bed/
-        mkdir -p norm_freq
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_same.mono ./bg_freq/$(basename ${3} .bed)_same.mono.freq -o ./norm_freq/$(basename ${3} .bed)_same_mono_0 --name $(basename ${3} .bed)_same
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_same.dinuc_d1_nr ./bg_freq/$(basename ${3} .bed)_same.di.freq --group_len 4 -o ./norm_freq/$(basename ${3} .bed)_same_dinuc_nr_4 --name $(basename ${3} .bed)_same
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_same.dinuc_d1_rn ./bg_freq/$(basename ${3} .bed)_same.di.freq --group_len 4 -o ./norm_freq/$(basename ${3} .bed)_same_dinuc_rn_4 --name $(basename ${3} .bed)_same
-
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_same.dinuc_d1_nr ./bg_freq/$(basename ${3} .bed)_same.di.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_same_dinuc_nr_16 --name $(basename ${3} .bed)_same
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_same.dinuc_d1_rn ./bg_freq/$(basename ${3} .bed)_same.di.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_same_dinuc_rn_16 --name $(basename ${3} .bed)_same
-
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_same.trinuc_nnr ./bg_freq/$(basename ${3} .bed)_same.tri.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_same_trinuc_nnr_16 --name $(basename ${3} .bed)_same
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_same.trinuc_nrn ./bg_freq/$(basename ${3} .bed)_same.tri.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_same_trinuc_nrn_16 --name $(basename ${3} .bed)_same
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_same.trinuc_rnn ./bg_freq/$(basename ${3} .bed)_same.tri.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_same_trinuc_rnn_16 --name $(basename ${3} .bed)_same
-        
-}
-
-norm_freq_os () {
-        #$1=Location of Scripts/git repo
-        #$2=Ref fasta
-        #$3=bed12 file of ranges
-        #$4=location of bed files
-        #Usage1: sample_freq ~/p-fstorici3-0/rich_project_bio-storici/bin/RibosePreferenceAnalysis/ ~/p-fstorici3-0/rich_project_bio-storici/reference/hg38/filtered_hg38.fa ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/anno/subtypes/hg38_cpg_islands.bed ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/bed/
-        mkdir -p norm_freq
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_opp.mono ./bg_freq/$(basename ${3} .bed)_opp.mono.freq -o ./norm_freq/$(basename ${3} .bed)_opp_mono_0 --name $(basename ${3} .bed)_opp
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_opp.dinuc_d1_nr ./bg_freq/$(basename ${3} .bed)_opp.di.freq --group_len 4 -o ./norm_freq/$(basename ${3} .bed)_opp_dinuc_nr_4 --name $(basename ${3} .bed)_opp
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_opp.dinuc_d1_rn ./bg_freq/$(basename ${3} .bed)_opp.di.freq --group_len 4 -o ./norm_freq/$(basename ${3} .bed)_opp_dinuc_rn_4 --name $(basename ${3} .bed)_opp
-
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_opp.dinuc_d1_nr ./bg_freq/$(basename ${3} .bed)_opp.di.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_opp_dinuc_nr_16 --name $(basename ${3} .bed)_opp
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_opp.dinuc_d1_rn ./bg_freq/$(basename ${3} .bed)_opp.di.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_opp_dinuc_rn_16 --name $(basename ${3} .bed)_opp
-
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_opp.trinuc_nnr ./bg_freq/$(basename ${3} .bed)_opp.tri.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_opp_trinuc_nnr_16 --name $(basename ${3} .bed)_opp
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_opp.trinuc_nrn ./bg_freq/$(basename ${3} .bed)_opp.tri.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_opp_trinuc_nrn_16 --name $(basename ${3} .bed)_opp
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_opp.trinuc_rnn ./bg_freq/$(basename ${3} .bed)_opp.tri.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_opp_trinuc_rnn_16 --name $(basename ${3} .bed)_opp
-        
-}
+norm_freq()    { _norm_freq "${1}" "$(basename ${3} .bed)" both; }
+norm_freq_ss() { _norm_freq "${1}" "$(basename ${3} .bed)" same; }
+norm_freq_os() { _norm_freq "${1}" "$(basename ${3} .bed)" opp;  }
 
 norm_freq_noname () {
         #$1=Location of Scripts/git repo
@@ -240,86 +193,39 @@ norm_freq_noname () {
         
 }
 
+_resort_and_plot() {
+        # $1=scripts, $2=order, $3=base (bed basename with optional strand tag)
+        local scripts=$1 order=$2 p=$3
+        python3 ${scripts}/resort.py ./norm_freq ${order} --base ${p} --mode mono
+        python3 ${scripts}/resort.py ./norm_freq ${order} --base ${p} --mode di
+        python3 ${scripts}/resort.py ./norm_freq ${order} --base ${p} --mode tri
+
+        mkdir -p plots
+        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_mono_0        -b ./bg_freq/${p}.mono.freq --background_chrom ${p} -o ./plots/sorted_${p}_mono_0        --palette RdBu_r --group_size 4
+        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_dinuc_nr_4    -b ./bg_freq/${p}.di.freq   --background_chrom ${p} -o ./plots/sorted_${p}_dinuc_nr_4    --palette RdBu_r --group_size 4
+        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_dinuc_rn_4    -b ./bg_freq/${p}.di.freq   --background_chrom ${p} -o ./plots/sorted_${p}_dinuc_rn_4    --palette RdBu_r --group_size 4
+        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_dinuc_nr_16   -b ./bg_freq/${p}.di.freq   --background_chrom ${p} -o ./plots/sorted_${p}_dinuc_nr_16   --palette RdBu_r --group_size 16
+        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_dinuc_rn_16   -b ./bg_freq/${p}.di.freq   --background_chrom ${p} -o ./plots/sorted_${p}_dinuc_rn_16   --palette RdBu_r --group_size 16
+        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_trinuc_nnr_16 -b ./bg_freq/${p}.tri.freq  --background_chrom ${p} -o ./plots/sorted_${p}_trinuc_nnr_16 --palette RdBu_r --group_size 16
+        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_trinuc_nrn_16 -b ./bg_freq/${p}.tri.freq  --background_chrom ${p} -o ./plots/sorted_${p}_trinuc_nrn_16 --palette RdBu_r --group_size 16
+        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_trinuc_rnn_16 -b ./bg_freq/${p}.tri.freq  --background_chrom ${p} -o ./plots/sorted_${p}_trinuc_rnn_16 --palette RdBu_r --group_size 16
+}
+
 resort_plot() {
-        #$1=Location of Scripts/git repo
-        #$2=Ref fasta
-        #$3=bed12 file of ranges
-        #$4=location of bed files
-        #$5=order file
-        #Usage1: resort_plot ~/p-fstorici3-0/rich_project_bio-storici/bin/RibosePreferenceAnalysis/ ~/p-fstorici3-0/rich_project_bio-storici/reference/hg38/filtered_hg38.fa ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/anno/subtypes/hg38_cpg_islands.bed ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/bed/ 
-        for file in $(ls ./norm_freq/$(basename ${3} .bed)*[0-9]); do 
-        python3 ${1}/resort.py ${file} ${5} -o ./norm_freq/sorted_$(basename $file)
-        done
-
-        mkdir -p plots 
-        for file in $(ls ./norm_freq/sorted_$(basename ${3} .bed)*mono*); do
-        python3 ${1}/draw_heatmap.py ${file} -b ./bg_freq/$(basename ${3} .bed).mono.freq --background_chrom $(basename ${3} .bed) -o ./plots/$(basename $file) --palette RdBu_r --group_size 4
-        done
-        for file in $(ls ./norm_freq/sorted_$(basename ${3} .bed)*dinuc*4); do
-        python3 ${1}/draw_heatmap.py ${file} -b ./bg_freq/$(basename ${3} .bed).di.freq --background_chrom $(basename ${3} .bed) -o ./plots/$(basename $file) --palette RdBu_r --group_size 4
-        done
-        for file in $(ls ./norm_freq/sorted_$(basename ${3} .bed)*dinuc*16); do
-        python3 ${1}/draw_heatmap.py ${file} -b ./bg_freq/$(basename ${3} .bed).di.freq --background_chrom $(basename ${3} .bed) -o ./plots/$(basename $file) --palette RdBu_r --group_size 16
-        done
-        for file in $(ls ./norm_freq/sorted_$(basename ${3} .bed)*trinuc*16); do
-        python3 ${1}/draw_heatmap.py ${file} -b ./bg_freq/$(basename ${3} .bed).tri.freq --background_chrom $(basename ${3} .bed) -o ./plots/$(basename $file) --palette RdBu_r --group_size 16
-        done
-
+        #$1=Location of Scripts/git repo $2=Ref fasta $3=bed12 file of ranges $4=bed dir $5=order file
+        _resort_and_plot "${1}" "${5}" "$(basename ${3} .bed)"
 }
 
 resort_plot_ss() {
-        #$1=Location of Scripts/git repo
-        #$2=Ref fasta
-        #$3=bed12 file of ranges
-        #$4=location of bed files
-        #$5=order file
-        #Usage1: resort_plot ~/p-fstorici3-0/rich_project_bio-storici/bin/RibosePreferenceAnalysis/ ~/p-fstorici3-0/rich_project_bio-storici/reference/hg38/filtered_hg38.fa ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/anno/subtypes/hg38_cpg_islands.bed ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/bed/ 
-        for file in $(ls ./norm_freq/$(basename ${3} .bed)*same*[0-9]); do 
-        python3 ${1}/resort.py ${file} ${5} -o ./norm_freq/sorted_$(basename $file)
-        done
-
-        mkdir -p plots 
-        for file in $(ls ./norm_freq/sorted_$(basename ${3} .bed)*same*mono*); do
-        python3 ${1}/draw_heatmap.py ${file} -b ./bg_freq/$(basename ${3} .bed)_same.mono.freq --background_chrom $(basename ${3} .bed)_same -o ./plots/$(basename $file)_same --palette RdBu_r --group_size 4
-        done
-        for file in $(ls ./norm_freq/sorted_$(basename ${3} .bed)*same*dinuc*4); do
-        python3 ${1}/draw_heatmap.py ${file} -b ./bg_freq/$(basename ${3} .bed)_same.di.freq --background_chrom $(basename ${3} .bed)_same -o ./plots/$(basename $file)_same --palette RdBu_r --group_size 4
-        done
-        for file in $(ls ./norm_freq/sorted_$(basename ${3} .bed)*same*dinuc*16); do
-        python3 ${1}/draw_heatmap.py ${file} -b ./bg_freq/$(basename ${3} .bed)_same.di.freq --background_chrom $(basename ${3} .bed)_same -o ./plots/$(basename $file)_same --palette RdBu_r --group_size 16
-        done
-        for file in $(ls ./norm_freq/sorted_$(basename ${3} .bed)*same*trinuc*16); do
-        python3 ${1}/draw_heatmap.py ${file} -b ./bg_freq/$(basename ${3} .bed)_same.tri.freq --background_chrom $(basename ${3} .bed)_same -o ./plots/$(basename $file)_same --palette RdBu_r --group_size 16
-        done
-
+        #$1=Location of Scripts/git repo $2=Ref fasta $3=bed12 file of ranges $4=bed dir $5=order file
+        _resort_and_plot "${1}" "${5}" "$(basename ${3} .bed)_same"
 }
 
 resort_plot_os() {
-        #$1=Location of Scripts/git repo
-        #$2=Ref fasta
-        #$3=bed12 file of ranges
-        #$4=location of bed files
-        #$5=order file
-        #Usage1: resort_plot ~/p-fstorici3-0/rich_project_bio-storici/bin/RibosePreferenceAnalysis/ ~/p-fstorici3-0/rich_project_bio-storici/reference/hg38/filtered_hg38.fa ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/anno/subtypes/hg38_cpg_islands.bed ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/bed/ 
-        for file in $(ls ./norm_freq/$(basename ${3} .bed)*opp*[0-9]); do 
-        python3 ${1}/resort.py ${file} ${5} -o ./norm_freq/sorted_$(basename $file)
-        done
-
-        mkdir -p plots 
-        for file in $(ls ./norm_freq/sorted_$(basename ${3} .bed)*opp*mono*); do
-        python3 ${1}/draw_heatmap.py ${file} -b ./bg_freq/$(basename ${3} .bed)_opp.mono.freq --background_chrom $(basename ${3} .bed)_opp -o ./plots/$(basename $file)_opp --palette RdBu_r --group_size 4
-        done
-        for file in $(ls ./norm_freq/sorted_$(basename ${3} .bed)*opp*dinuc*4); do
-        python3 ${1}/draw_heatmap.py ${file} -b ./bg_freq/$(basename ${3} .bed)_opp.di.freq --background_chrom $(basename ${3} .bed)_opp -o ./plots/$(basename $file)_opp --palette RdBu_r --group_size 4
-        done
-        for file in $(ls ./norm_freq/sorted_$(basename ${3} .bed)*opp*dinuc*16); do
-        python3 ${1}/draw_heatmap.py ${file} -b ./bg_freq/$(basename ${3} .bed)_opp.di.freq --background_chrom $(basename ${3} .bed)_opp -o ./plots/$(basename $file)_opp --palette RdBu_r --group_size 16
-        done
-        for file in $(ls ./norm_freq/sorted_$(basename ${3} .bed)*opp*trinuc*16); do
-        python3 ${1}/draw_heatmap.py ${file} -b ./bg_freq/$(basename ${3} .bed)_opp.tri.freq --background_chrom $(basename ${3} .bed)_opp -o ./plots/$(basename $file)_opp --palette RdBu_r --group_size 16
-        done
-
+        #$1=Location of Scripts/git repo $2=Ref fasta $3=bed12 file of ranges $4=bed dir $5=order file
+        _resort_and_plot "${1}" "${5}" "$(basename ${3} .bed)_opp"
 }
+
 
 mww() {
         #$1=Location of Scripts/git repo

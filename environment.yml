@@ -58,6 +58,7 @@ dependencies:
   - patsy=1.0.2=pyhcf101f3_0
   - pillow=11.3.0=py314hdf18abd_3
   - pip=25.2=pyh145f28c_0
+  - pyfaidx
   - pthread-stubs=0.4=hb9d3cd8_1002
   - pyparsing=3.2.5=pyhcf101f3_0
   - python=3.14.0=h5989046_101_cp314
