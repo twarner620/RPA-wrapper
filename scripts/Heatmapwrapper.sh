@@ -1,4 +1,4 @@
-#!usr/bin/env bash
+#!/usr/bin/env bash
 
 #Wrapper script for Ribosepreference analysis from Penghao
 ###########################################################
@@ -102,9 +102,9 @@ sample_freq () {
         #Usage1: sample_freq ~/p-fstorici3-0/rich_project_bio-storici/bin/RibosePreferenceAnalysis/ ~/p-fstorici3-0/rich_project_bio-storici/reference/hg38/filtered_hg38.fa ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/anno/subtypes/hg38_cpg_islands.bed ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/bed/OG_bed/
         mkdir -p sample_freq
         mkdir -p sample_freq/$(basename ${3} .bed)
-        for file in $(ls ${4}/*.bed); do
-        bedtools intersect -nonamecheck -b ${3} -a ${file} > ./sample_freq/$(basename ${3} .bed)/$(basename ${file})
-        #bedtools intersect -s -nonamecheck -b ${3} -a ${file} > ./sample_freq/$(basename ${3} .bed)/$(basename ${file})
+        for file in "${4}"/*.bed; do
+        bedtools intersect -nonamecheck -b ${3} -a "${file}" > ./sample_freq/$(basename ${3} .bed)/$(basename "${file}")
+        #bedtools intersect -s -nonamecheck -b ${3} -a "${file}" > ./sample_freq/$(basename ${3} .bed)/$(basename "${file}")
         done
         python3 ${1}/count_rNMP.py ${2} ./sample_freq/$(basename ${3} .bed)/*.bed -d -m -t -o ./sample_freq/$(basename ${3} .bed)/
         #python3 ${1}/count_rNMP.py ${2} ./sample_freq/$(basename ${3} .bed)/*.bed --dist 0 -d -m -t -o ./sample_freq/$(basename ${3} .bed)/ #changing distance
@@ -124,8 +124,8 @@ sample_freq_ss () {
         #Usage1: sample_freq ~/p-fstorici3-0/rich_project_bio-storici/bin/RibosePreferenceAnalysis/ ~/p-fstorici3-0/rich_project_bio-storici/reference/hg38/filtered_hg38.fa ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/anno/subtypes/hg38_cpg_islands.bed ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/bed/OG_bed/
         mkdir -p sample_freq
         mkdir -p sample_freq/$(basename ${3} .bed)_same
-        for file in $(ls ${4}/*.bed); do
-        bedtools intersect -s -nonamecheck -b ${3} -a ${file} > ./sample_freq/$(basename ${3} .bed)_same/$(basename ${file})
+        for file in "${4}"/*.bed; do
+        bedtools intersect -s -nonamecheck -b ${3} -a "${file}" > ./sample_freq/$(basename ${3} .bed)_same/$(basename "${file}")
         done
         python3 ${1}/count_rNMP.py ${2} ./sample_freq/$(basename ${3} .bed)_same/*.bed -d -m -t -o ./sample_freq/$(basename ${3} .bed)_same/
         #python3 ${1}/count_rNMP.py ${2} ./sample_freq/$(basename ${3} .bed)/*.bed --dist 0 -d -m -t -o ./sample_freq/$(basename ${3} .bed)/ #changing distance
@@ -145,8 +145,8 @@ sample_freq_os () {
         #Usage1: sample_freq ~/p-fstorici3-0/rich_project_bio-storici/bin/RibosePreferenceAnalysis/ ~/p-fstorici3-0/rich_project_bio-storici/reference/hg38/filtered_hg38.fa ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/anno/subtypes/hg38_cpg_islands.bed ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/bed/OG_bed/
         mkdir -p sample_freq
         mkdir -p sample_freq/$(basename ${3} .bed)_opp
-        for file in $(ls ${4}/*.bed); do
-        bedtools intersect -S -nonamecheck -b ${3} -a ${file} > ./sample_freq/$(basename ${3} .bed)_opp/$(basename ${file})
+        for file in "${4}"/*.bed; do
+        bedtools intersect -S -nonamecheck -b ${3} -a "${file}" > ./sample_freq/$(basename ${3} .bed)_opp/$(basename "${file}")
         done
         python3 ${1}/count_rNMP.py ${2} ./sample_freq/$(basename ${3} .bed)_opp/*.bed -d -m -t -o ./sample_freq/$(basename ${3} .bed)_opp/
         #python3 ${1}/count_rNMP.py ${2} ./sample_freq/$(basename ${3} .bed)/*.bed --dist 0 -d -m -t -o ./sample_freq/$(basename ${3} .bed)/ #changing distance
@@ -172,25 +172,9 @@ norm_freq()    { _norm_freq "${1}" "$(basename ${3} .bed)" both; }
 norm_freq_ss() { _norm_freq "${1}" "$(basename ${3} .bed)" same; }
 norm_freq_os() { _norm_freq "${1}" "$(basename ${3} .bed)" opp;  }
 
-norm_freq_noname () {
-        #$1=Location of Scripts/git repo
-        #$2=Ref fasta
-        #$3=bed12 file of ranges
-        #$4=location of bed files
-        #Usage1: sample_freq ~/p-fstorici3-0/rich_project_bio-storici/bin/RibosePreferenceAnalysis/ ~/p-fstorici3-0/rich_project_bio-storici/reference/hg38/filtered_hg38.fa ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/anno/subtypes/hg38_cpg_islands.bed ~/p-fstorici3-0/rich_project_bio-storici/HEKnH9/bed/
-        mkdir -p norm_freq
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_sample.mono ./bg_freq/$(basename ${3} .bed).mono.freq -o ./norm_freq/$(basename ${3} .bed)_mono_0 
-
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_sample.dinuc_d1_nr ./bg_freq/$(basename ${3} .bed).di.freq --group_len 4 -o ./norm_freq/$(basename ${3} .bed)_dinuc_nr_4 
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_sample.dinuc_d1_rn ./bg_freq/$(basename ${3} .bed).di.freq --group_len 4 -o ./norm_freq/$(basename ${3} .bed)_dinuc_rn_4 
-
-        #python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_sample.dinuc_d1_nr ./bg_freq/$(basename ${3} .bed).di.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_dinuc_nr_16 
-        #python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_sample.dinuc_d1_rn ./bg_freq/$(basename ${3} .bed).di.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_dinuc_rn_16 
-
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_sample.trinuc_nnr ./bg_freq/$(basename ${3} .bed).tri.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_trinuc_nnr_16 
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_sample.trinuc_nrn ./bg_freq/$(basename ${3} .bed).tri.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_trinuc_nrn_16 
-        python3 ${1}/normalize.py ./sample_freq/$(basename ${3} .bed)_sample.trinuc_rnn ./bg_freq/$(basename ${3} .bed).tri.freq --group_len 16 -o ./norm_freq/$(basename ${3} .bed)_trinuc_rnn_16 
-        
+norm_freq_noname() {
+        #$1=Location of Scripts/git repo $2=Ref fasta $3=bed12 file of ranges $4=location of bed files
+        _norm_freq "${1}" "$(basename ${3} .bed)" both
 }
 
 _resort_and_plot() {
