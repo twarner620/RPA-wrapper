@@ -28,3 +28,12 @@ __pycache__/
 .Rhistory
 .RData
 *.Rout
+
+# Testing outputs
+testing/*
+
+# Git worktrees for branch comparison
+RPA-master/
+
+# Run logs
+*.log
