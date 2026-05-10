@@ -97,13 +97,14 @@ The RPA submodule path and all internal paths are resolved automatically — no 
 
 ### Initializing functions and activating environment
 ```bash
-conda activate RPAwrapper_env
+conda activate heatmap
 source path/to/RPA-wrapper/scripts/Heatmapwrapper.sh
 ```
 
 ### Running Masterrun.sh
 Edit the variables at the top of `scripts/Masterrun.sh`, then run from the repo root:
 ```bash
+conda activate heatmap
 source path/to/RPA-wrapper/scripts/Masterrun.sh
 ```
 This single command runs the full pipeline for all three strand modes in parallel:
