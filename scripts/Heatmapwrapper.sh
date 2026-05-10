@@ -129,6 +129,10 @@ sample_freq_ss () {
         done
         python3 ${1}/count_rNMP.py ${2} ./sample_freq/$(basename ${3} .bed)_same/*.bed -d -m -t -o ./sample_freq/$(basename ${3} .bed)_same/
         #python3 ${1}/count_rNMP.py ${2} ./sample_freq/$(basename ${3} .bed)/*.bed --dist 0 -d -m -t -o ./sample_freq/$(basename ${3} .bed)/ #changing distance
+        if ! ls ./sample_freq/$(basename ${3} .bed)_same/*.mono >/dev/null 2>&1; then
+            echo "[WARNING] sample_freq_ss: no rNMPs after same-strand filtering — range file likely lacks strand info, skipping"
+            return
+        fi
         python3 ${1}/get_chrom.py ./sample_freq/$(basename ${3} .bed)_same/*.mono -s chr0 -v -o ./sample_freq/$(basename ${3} .bed)_same.mono
         python3 ${1}/get_chrom.py ./sample_freq/$(basename ${3} .bed)_same/*.dinuc_d1_nr -s chr0 -v -o ./sample_freq/$(basename ${3} .bed)_same.dinuc_d1_nr
         python3 ${1}/get_chrom.py ./sample_freq/$(basename ${3} .bed)_same/*.dinuc_d1_rn -s chr0 -v -o ./sample_freq/$(basename ${3} .bed)_same.dinuc_d1_rn
@@ -150,6 +154,10 @@ sample_freq_os () {
         done
         python3 ${1}/count_rNMP.py ${2} ./sample_freq/$(basename ${3} .bed)_opp/*.bed -d -m -t -o ./sample_freq/$(basename ${3} .bed)_opp/
         #python3 ${1}/count_rNMP.py ${2} ./sample_freq/$(basename ${3} .bed)/*.bed --dist 0 -d -m -t -o ./sample_freq/$(basename ${3} .bed)/ #changing distance
+        if ! ls ./sample_freq/$(basename ${3} .bed)_opp/*.mono >/dev/null 2>&1; then
+            echo "[WARNING] sample_freq_os: no rNMPs after opposite-strand filtering — range file likely lacks strand info, skipping"
+            return
+        fi
         python3 ${1}/get_chrom.py ./sample_freq/$(basename ${3} .bed)_opp/*.mono -s chr0 -v -o ./sample_freq/$(basename ${3} .bed)_opp.mono
         python3 ${1}/get_chrom.py ./sample_freq/$(basename ${3} .bed)_opp/*.dinuc_d1_nr -s chr0 -v -o ./sample_freq/$(basename ${3} .bed)_opp.dinuc_d1_nr
         python3 ${1}/get_chrom.py ./sample_freq/$(basename ${3} .bed)_opp/*.dinuc_d1_rn -s chr0 -v -o ./sample_freq/$(basename ${3} .bed)_opp.dinuc_d1_rn
@@ -163,9 +171,10 @@ _norm_freq() {
         # $1=scripts, $2=base, $3=strand (both/same/opp)
         local scripts=$1 base=$2 strand=$3
         mkdir -p norm_freq
-        python3 ${scripts}/normalize.py --base ${base} --mode mono --strand ${strand}
-        python3 ${scripts}/normalize.py --base ${base} --mode di   --strand ${strand}
-        python3 ${scripts}/normalize.py --base ${base} --mode tri  --strand ${strand}
+        python3 ${scripts}/normalize.py --base ${base} --mode mono --strand ${strand} &
+        python3 ${scripts}/normalize.py --base ${base} --mode di   --strand ${strand} &
+        python3 ${scripts}/normalize.py --base ${base} --mode tri  --strand ${strand} &
+        wait
 }
 
 norm_freq()    { _norm_freq "${1}" "$(basename ${3} .bed)" both; }
@@ -180,19 +189,21 @@ norm_freq_noname() {
 _resort_and_plot() {
         # $1=scripts, $2=order, $3=base (bed basename with optional strand tag)
         local scripts=$1 order=$2 p=$3
-        python3 ${scripts}/resort.py ./norm_freq ${order} --base ${p} --mode mono
-        python3 ${scripts}/resort.py ./norm_freq ${order} --base ${p} --mode di
-        python3 ${scripts}/resort.py ./norm_freq ${order} --base ${p} --mode tri
+        python3 ${scripts}/resort.py ./norm_freq ${order} --base ${p} --mode mono &
+        python3 ${scripts}/resort.py ./norm_freq ${order} --base ${p} --mode di   &
+        python3 ${scripts}/resort.py ./norm_freq ${order} --base ${p} --mode tri  &
+        wait
 
         mkdir -p plots
-        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_mono_0        -b ./bg_freq/${p}.mono.freq --background_chrom ${p} -o ./plots/sorted_${p}_mono_0        --palette RdBu_r --group_size 4
-        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_dinuc_nr_4    -b ./bg_freq/${p}.di.freq   --background_chrom ${p} -o ./plots/sorted_${p}_dinuc_nr_4    --palette RdBu_r --group_size 4
-        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_dinuc_rn_4    -b ./bg_freq/${p}.di.freq   --background_chrom ${p} -o ./plots/sorted_${p}_dinuc_rn_4    --palette RdBu_r --group_size 4
-        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_dinuc_nr_16   -b ./bg_freq/${p}.di.freq   --background_chrom ${p} -o ./plots/sorted_${p}_dinuc_nr_16   --palette RdBu_r --group_size 16
-        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_dinuc_rn_16   -b ./bg_freq/${p}.di.freq   --background_chrom ${p} -o ./plots/sorted_${p}_dinuc_rn_16   --palette RdBu_r --group_size 16
-        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_trinuc_nnr_16 -b ./bg_freq/${p}.tri.freq  --background_chrom ${p} -o ./plots/sorted_${p}_trinuc_nnr_16 --palette RdBu_r --group_size 16
-        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_trinuc_nrn_16 -b ./bg_freq/${p}.tri.freq  --background_chrom ${p} -o ./plots/sorted_${p}_trinuc_nrn_16 --palette RdBu_r --group_size 16
-        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_trinuc_rnn_16 -b ./bg_freq/${p}.tri.freq  --background_chrom ${p} -o ./plots/sorted_${p}_trinuc_rnn_16 --palette RdBu_r --group_size 16
+        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_mono_0        -b ./bg_freq/${p}.mono.freq --background_chrom ${p} -o ./plots/sorted_${p}_mono_0        --palette RdBu_r --group_size 4  &
+        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_dinuc_nr_4    -b ./bg_freq/${p}.di.freq   --background_chrom ${p} -o ./plots/sorted_${p}_dinuc_nr_4    --palette RdBu_r --group_size 4  &
+        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_dinuc_rn_4    -b ./bg_freq/${p}.di.freq   --background_chrom ${p} -o ./plots/sorted_${p}_dinuc_rn_4    --palette RdBu_r --group_size 4  &
+        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_dinuc_nr_16   -b ./bg_freq/${p}.di.freq   --background_chrom ${p} -o ./plots/sorted_${p}_dinuc_nr_16   --palette RdBu_r --group_size 16 &
+        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_dinuc_rn_16   -b ./bg_freq/${p}.di.freq   --background_chrom ${p} -o ./plots/sorted_${p}_dinuc_rn_16   --palette RdBu_r --group_size 16 &
+        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_trinuc_nnr_16 -b ./bg_freq/${p}.tri.freq  --background_chrom ${p} -o ./plots/sorted_${p}_trinuc_nnr_16 --palette RdBu_r --group_size 16 &
+        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_trinuc_nrn_16 -b ./bg_freq/${p}.tri.freq  --background_chrom ${p} -o ./plots/sorted_${p}_trinuc_nrn_16 --palette RdBu_r --group_size 16 &
+        python3 ${scripts}/draw_heatmap.py ./norm_freq/sorted_${p}_trinuc_rnn_16 -b ./bg_freq/${p}.tri.freq  --background_chrom ${p} -o ./plots/sorted_${p}_trinuc_rnn_16 --palette RdBu_r --group_size 16 &
+        wait
 }
 
 resort_plot() {
