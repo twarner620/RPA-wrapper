@@ -2,7 +2,7 @@ beds
 
 # Personal cluster submission script and run configuration
 submit.sbatch
-scripts/Masterrun.sh
+scripts/Masterrun_*.sh
 
 # Generated background frequency cache
 bg_freq/
